@@ -75,6 +75,16 @@ npx tsx src/cli.ts export --target codex
 - env file support and safer secret handling
 - install/update workflows for packaged servers
 
+## Portfolio
+
+This repository is part of a larger open-source tooling batch:
+- Profile hub: https://github.com/xtt1997
+- `skillgrade`: trust layer for Agent Skills
+- `promptdiff`: prompt/eval snapshot diff CLI
+- `repocanon`: repository summary generator
+- `feishu-mcp-starter`: Feishu MCP starter kit
+- `csvlens-web`: browser CSV inspector
+
 ## License
 
 MIT
