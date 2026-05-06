@@ -10,6 +10,7 @@ import { doctorConfig } from "./doctor.js";
 import { exportForTarget } from "./export.js";
 import { buildServerFromTemplate } from "./factory.js";
 import { discoverClientConfig, importClientConfig, importFromClient } from "./import.js";
+import { syncClients } from "./sync.js";
 import { getTemplate, getTemplates } from "./templates.js";
 import type { ClientId } from "./types.js";
 
@@ -26,6 +27,7 @@ Commands:
   discover --client codex|claude-desktop|cursor [--json]
   import (--from path | --client codex|claude-desktop|cursor) [--config path]
   diff --target codex|claude-desktop|cursor [--config path] [--json]
+  sync [--clients codex,claude-desktop,cursor] [--config path] [--json]
   apply --target codex|claude-desktop|cursor [--config path] [--json]
   rollback --target codex|claude-desktop|cursor [--json]
   doctor [--config path] [--json]
@@ -145,6 +147,19 @@ async function main(): Promise<void> {
         console.log(
           `${target}: added=${diff.summary.added} changed=${diff.summary.changed} removed=${diff.summary.removed} unchanged=${diff.summary.unchanged}`,
         );
+      }
+      return;
+    }
+    case "sync": {
+      const clients = parseClients(flagValue(args, "--clients"));
+      const config = await loadConfig(configPath);
+      const results = await syncClients(clients, config);
+      if (json) {
+        console.log(JSON.stringify(results, null, 2));
+      } else {
+        for (const item of results) {
+          console.log(`${item.client}: applied -> ${item.targetPath}`);
+        }
       }
       return;
     }
