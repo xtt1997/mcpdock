@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { importClientConfig } from "../src/import.js";
+import { discoverClientConfig, importClientConfig, importFromClient } from "../src/import.js";
 
 const tmpDirs: string[] = [];
 
@@ -99,5 +99,53 @@ describe("importClientConfig", () => {
         env: {},
       },
     ]);
+  });
+
+  it("discovers a known client config path from a custom home directory", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "mcpdock-"));
+    tmpDirs.push(dir);
+    const clientConfigPath = path.join(
+      dir,
+      "Library",
+      "Application Support",
+      "Claude",
+      "claude_desktop_config.json",
+    );
+    await fs.mkdir(path.dirname(clientConfigPath), { recursive: true });
+    await fs.writeFile(clientConfigPath, JSON.stringify({ mcpServers: {} }), "utf8");
+
+    const discovery = await discoverClientConfig("claude-desktop", dir);
+
+    expect(discovery.status).toBe("present");
+    expect(discovery.selectedPath).toBe(clientConfigPath);
+  });
+
+  it("imports directly from a discovered client config", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "mcpdock-"));
+    tmpDirs.push(dir);
+    const clientConfigPath = path.join(dir, ".codex", "config.json");
+    await fs.mkdir(path.dirname(clientConfigPath), { recursive: true });
+    await fs.writeFile(
+      clientConfigPath,
+      JSON.stringify(
+        {
+          mcpServers: {
+            filesystem: {
+              command: "npx",
+              args: ["-y", "@modelcontextprotocol/server-filesystem", "."],
+              env: {},
+            },
+          },
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    const imported = await importFromClient("codex", { servers: [] }, dir);
+
+    expect(imported.servers[0]?.name).toBe("filesystem");
+    expect(imported.servers[0]?.template).toBe("imported");
   });
 });

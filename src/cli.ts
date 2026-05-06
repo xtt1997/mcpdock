@@ -6,8 +6,9 @@ import { addServer, loadConfig, saveConfig } from "./config.js";
 import { doctorConfig } from "./doctor.js";
 import { exportForTarget } from "./export.js";
 import { buildServerFromTemplate } from "./factory.js";
-import { importClientConfig } from "./import.js";
+import { discoverClientConfig, importClientConfig, importFromClient } from "./import.js";
 import { getTemplate, getTemplates } from "./templates.js";
+import type { ClientId } from "./types.js";
 
 const DEFAULT_CONFIG = "mcpdock.json";
 
@@ -18,7 +19,8 @@ Commands:
   templates [--json]
   init [--config path]
   add <template> [--name value] [--config path]
-  import --from path [--config path]
+  discover --client codex|claude-desktop|cursor [--json]
+  import (--from path | --client codex|claude-desktop|cursor) [--config path]
   doctor [--config path] [--json]
   export --target codex|claude-desktop|cursor [--config path]`);
 }
@@ -30,6 +32,13 @@ function flagValue(args: string[], flag: string): string | undefined {
 
 function hasFlag(args: string[], flag: string): boolean {
   return args.includes(flag);
+}
+
+function parseClient(value: string | undefined): ClientId | undefined {
+  if (!value || !["codex", "claude-desktop", "cursor"].includes(value)) {
+    return undefined;
+  }
+  return value as ClientId;
 }
 
 async function main(): Promise<void> {
@@ -90,13 +99,26 @@ async function main(): Promise<void> {
       }
       process.exit(report.every((item) => item.commandStatus === "present" && item.envStatus === "ok") ? 0 : 1);
     }
+    case "discover": {
+      const client = parseClient(flagValue(args, "--client"));
+      if (!client) {
+        throw new Error("discover requires --client codex|claude-desktop|cursor");
+      }
+      const discovery = await discoverClientConfig(client);
+      console.log(json ? JSON.stringify(discovery, null, 2) : `${client}: ${discovery.status} (${discovery.selectedPath})`);
+      process.exit(discovery.status === "present" ? 0 : 1);
+    }
     case "import": {
       const fromPath = flagValue(args, "--from");
-      if (!fromPath) {
-        throw new Error("import requires --from path/to/client-config.json");
-      }
       const config = await loadConfig(configPath);
-      const updated = await importClientConfig(fromPath, config);
+      const client = parseClient(flagValue(args, "--client"));
+      const updated = fromPath
+        ? await importClientConfig(fromPath, config)
+        : client
+          ? await importFromClient(client, config)
+          : (() => {
+              throw new Error("import requires either --from path/to/client-config.json or --client codex|claude-desktop|cursor");
+            })();
       await saveConfig(configPath, updated);
       console.log(json ? JSON.stringify(updated, null, 2) : `Imported ${updated.servers.length} servers into ${configPath}`);
       return;

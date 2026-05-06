@@ -25,3 +25,12 @@ export interface DoctorEntry {
   envStatus: "ok" | "missing";
   missingEnv: string[];
 }
+
+export type ClientId = "codex" | "claude-desktop" | "cursor";
+
+export interface ClientConfigDiscovery {
+  client: ClientId;
+  selectedPath: string;
+  candidatePaths: string[];
+  status: "present" | "missing";
+}

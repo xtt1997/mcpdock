@@ -25,6 +25,7 @@ The practical flow is now:
 - `templates` shows a curated starter catalog
 - `init` creates `mcpdock.json`
 - `add` adds a server definition from a template
+- `discover` resolves the default config path for a known client
 - `import` pulls existing `mcpServers` definitions from a client config JSON
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON
@@ -46,6 +47,8 @@ npx tsx src/cli.ts --help
 
 ```bash
 npx tsx src/cli.ts init
+npx tsx src/cli.ts discover --client claude-desktop
+npx tsx src/cli.ts import --client claude-desktop
 npx tsx src/cli.ts import --from ~/.codex/config.json
 npx tsx src/cli.ts add github --name github-main
 npx tsx src/cli.ts doctor
