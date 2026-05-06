@@ -27,7 +27,7 @@ The practical flow is now:
 - `add` adds a server definition from a template
 - `discover` resolves the default config path for a known client
 - `import` pulls existing `mcpServers` definitions from a client config JSON
-- `apply` writes the exported config into a target client file and creates a backup when overwriting
+- `apply` writes the exported config into a target client file, preserves unrelated top-level settings, and creates a backup when overwriting
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON
 

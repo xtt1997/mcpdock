@@ -88,4 +88,56 @@ describe("applyToClient", () => {
     expect(Object.keys(backup.mcpServers)).toEqual(["old"]);
     expect(Object.keys(written.mcpServers)).toEqual(["fetch"]);
   });
+
+  it("preserves unrelated top-level keys when applying over an existing file", async () => {
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "mcpdock-"));
+    tmpDirs.push(homeDir);
+    const targetPath = path.join(homeDir, ".codex", "config.json");
+    await fs.mkdir(path.dirname(targetPath), { recursive: true });
+    await fs.writeFile(
+      targetPath,
+      JSON.stringify(
+        {
+          theme: "dark",
+          window: {
+            zoom: 1.1,
+          },
+          mcpServers: {
+            old: {
+              command: "old",
+            },
+          },
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+
+    await applyToClient(
+      "codex",
+      {
+        servers: [
+          {
+            name: "github",
+            template: "imported",
+            command: "npx",
+            args: ["-y", "@modelcontextprotocol/server-github"],
+            env: {},
+          },
+        ],
+      },
+      homeDir,
+    );
+
+    const written = JSON.parse(await fs.readFile(targetPath, "utf8")) as {
+      theme: string;
+      window: { zoom: number };
+      mcpServers: Record<string, unknown>;
+    };
+
+    expect(written.theme).toBe("dark");
+    expect(written.window.zoom).toBe(1.1);
+    expect(Object.keys(written.mcpServers)).toEqual(["github"]);
+  });
 });

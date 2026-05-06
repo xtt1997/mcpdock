@@ -12,19 +12,27 @@ export async function applyToClient(
 ): Promise<{ targetPath: string; backupPath: string | null }> {
   const discovery = await discoverClientConfig(target, homeDir);
   const targetPath = discovery.selectedPath;
-  const rendered = exportForTarget(config, target);
+  const rendered = exportForTarget(config, target) as { mcpServers: Record<string, unknown> };
 
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
 
   let backupPath: string | null = null;
+  let existing: Record<string, unknown> = {};
   try {
     await fs.access(targetPath);
     backupPath = `${targetPath}.bak`;
     await fs.copyFile(targetPath, backupPath);
+    existing = JSON.parse(await fs.readFile(targetPath, "utf8")) as Record<string, unknown>;
   } catch {
     backupPath = null;
+    existing = {};
   }
 
-  await fs.writeFile(targetPath, `${JSON.stringify(rendered, null, 2)}\n`, "utf8");
+  const nextConfig = {
+    ...existing,
+    mcpServers: rendered.mcpServers,
+  };
+
+  await fs.writeFile(targetPath, `${JSON.stringify(nextConfig, null, 2)}\n`, "utf8");
   return { targetPath, backupPath };
 }
