@@ -27,6 +27,7 @@ The practical flow is now:
 - `add` adds a server definition from a template
 - `discover` resolves the default config path for a known client
 - `import` pulls existing `mcpServers` definitions from a client config JSON
+- `diff` compares your `mcpdock.json` against a target client before writing changes
 - `apply` writes the exported config into a target client file, preserves unrelated top-level settings, and creates a backup when overwriting
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON
@@ -53,6 +54,7 @@ npx tsx src/cli.ts import --client claude-desktop
 npx tsx src/cli.ts import --from ~/.codex/config.json
 npx tsx src/cli.ts add github --name github-main
 npx tsx src/cli.ts doctor
+npx tsx src/cli.ts diff --target codex
 npx tsx src/cli.ts apply --target codex
 npx tsx src/cli.ts export --target codex
 ```

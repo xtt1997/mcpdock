@@ -4,6 +4,7 @@ import process from "node:process";
 
 import { applyToClient } from "./apply.js";
 import { addServer, loadConfig, saveConfig } from "./config.js";
+import { diffAgainstClient } from "./diff.js";
 import { doctorConfig } from "./doctor.js";
 import { exportForTarget } from "./export.js";
 import { buildServerFromTemplate } from "./factory.js";
@@ -22,6 +23,7 @@ Commands:
   add <template> [--name value] [--config path]
   discover --client codex|claude-desktop|cursor [--json]
   import (--from path | --client codex|claude-desktop|cursor) [--config path]
+  diff --target codex|claude-desktop|cursor [--config path] [--json]
   apply --target codex|claude-desktop|cursor [--config path] [--json]
   doctor [--config path] [--json]
   export --target codex|claude-desktop|cursor [--config path]`);
@@ -100,6 +102,22 @@ async function main(): Promise<void> {
         }
       }
       process.exit(report.every((item) => item.commandStatus === "present" && item.envStatus === "ok") ? 0 : 1);
+    }
+    case "diff": {
+      const target = parseClient(flagValue(args, "--target"));
+      if (!target) {
+        throw new Error("diff requires --target codex|claude-desktop|cursor");
+      }
+      const config = await loadConfig(configPath);
+      const diff = await diffAgainstClient(target, config);
+      if (json) {
+        console.log(JSON.stringify(diff, null, 2));
+      } else {
+        console.log(
+          `${target}: added=${diff.summary.added} changed=${diff.summary.changed} removed=${diff.summary.removed} unchanged=${diff.summary.unchanged}`,
+        );
+      }
+      return;
     }
     case "apply": {
       const target = parseClient(flagValue(args, "--target"));
