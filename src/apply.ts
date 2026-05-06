@@ -30,7 +30,10 @@ export async function applyToClient(
 
   const nextConfig = {
     ...existing,
-    mcpServers: rendered.mcpServers,
+    mcpServers: {
+      ...((existing.mcpServers as Record<string, unknown> | undefined) ?? {}),
+      ...rendered.mcpServers,
+    },
   };
 
   await fs.writeFile(targetPath, `${JSON.stringify(nextConfig, null, 2)}\n`, "utf8");

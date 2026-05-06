@@ -30,7 +30,7 @@ The practical flow is now:
 - `import` pulls existing `mcpServers` definitions from a client config JSON
 - `diff` compares your `mcpdock.json` against a target client before writing changes
 - `sync` applies the same managed config to multiple clients in one run
-- `apply` writes the exported config into a target client file, preserves unrelated top-level settings, and creates a backup when overwriting
+- `apply` merges managed servers into a target client file by default, preserves unrelated top-level settings, and creates a backup when overwriting
 - `rollback` restores the most recent client backup created by `apply`
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON

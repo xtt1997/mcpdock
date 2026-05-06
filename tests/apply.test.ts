@@ -86,7 +86,7 @@ describe("applyToClient", () => {
     };
 
     expect(Object.keys(backup.mcpServers)).toEqual(["old"]);
-    expect(Object.keys(written.mcpServers)).toEqual(["fetch"]);
+    expect(Object.keys(written.mcpServers)).toEqual(["old", "fetch"]);
   });
 
   it("preserves unrelated top-level keys when applying over an existing file", async () => {
@@ -138,7 +138,7 @@ describe("applyToClient", () => {
 
     expect(written.theme).toBe("dark");
     expect(written.window.zoom).toBe(1.1);
-    expect(Object.keys(written.mcpServers)).toEqual(["github"]);
+    expect(Object.keys(written.mcpServers)).toEqual(["old", "github"]);
   });
 
   it("restores the last backup for a client config", async () => {
