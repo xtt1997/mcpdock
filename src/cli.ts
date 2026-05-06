@@ -2,6 +2,7 @@
 
 import process from "node:process";
 
+import { applyToClient } from "./apply.js";
 import { addServer, loadConfig, saveConfig } from "./config.js";
 import { doctorConfig } from "./doctor.js";
 import { exportForTarget } from "./export.js";
@@ -21,6 +22,7 @@ Commands:
   add <template> [--name value] [--config path]
   discover --client codex|claude-desktop|cursor [--json]
   import (--from path | --client codex|claude-desktop|cursor) [--config path]
+  apply --target codex|claude-desktop|cursor [--config path] [--json]
   doctor [--config path] [--json]
   export --target codex|claude-desktop|cursor [--config path]`);
 }
@@ -98,6 +100,16 @@ async function main(): Promise<void> {
         }
       }
       process.exit(report.every((item) => item.commandStatus === "present" && item.envStatus === "ok") ? 0 : 1);
+    }
+    case "apply": {
+      const target = parseClient(flagValue(args, "--target"));
+      if (!target) {
+        throw new Error("apply requires --target codex|claude-desktop|cursor");
+      }
+      const config = await loadConfig(configPath);
+      const result = await applyToClient(target, config);
+      console.log(json ? JSON.stringify(result, null, 2) : `Applied ${config.servers.length} servers to ${result.targetPath}`);
+      return;
     }
     case "discover": {
       const client = parseClient(flagValue(args, "--client"));

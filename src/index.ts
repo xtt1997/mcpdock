@@ -1,4 +1,5 @@
 export { loadConfig, saveConfig, addServer } from "./config.js";
+export { applyToClient } from "./apply.js";
 export { doctorConfig } from "./doctor.js";
 export { exportForTarget } from "./export.js";
 export { buildServerFromTemplate } from "./factory.js";
