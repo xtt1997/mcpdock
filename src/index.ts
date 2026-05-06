@@ -1,3 +1,4 @@
+export { auditClients } from "./audit.js";
 export { loadConfig, saveConfig, addServer } from "./config.js";
 export { diffAgainstClient } from "./diff.js";
 export { applyToClient } from "./apply.js";

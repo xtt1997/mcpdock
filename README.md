@@ -25,6 +25,7 @@ The practical flow is now:
 - `templates` shows a curated starter catalog
 - `init` creates `mcpdock.json`
 - `add` adds a server definition from a template
+- `audit` compares your managed config against one or more client configs
 - `discover` resolves the default config path for a known client
 - `import` pulls existing `mcpServers` definitions from a client config JSON
 - `diff` compares your `mcpdock.json` against a target client before writing changes
@@ -49,6 +50,7 @@ npx tsx src/cli.ts --help
 
 ```bash
 npx tsx src/cli.ts init
+npx tsx src/cli.ts audit --clients codex,claude-desktop,cursor
 npx tsx src/cli.ts discover --client claude-desktop
 npx tsx src/cli.ts import --client claude-desktop
 npx tsx src/cli.ts import --from ~/.codex/config.json

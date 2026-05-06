@@ -3,6 +3,7 @@
 import process from "node:process";
 
 import { applyToClient } from "./apply.js";
+import { auditClients } from "./audit.js";
 import { addServer, loadConfig, saveConfig } from "./config.js";
 import { diffAgainstClient } from "./diff.js";
 import { doctorConfig } from "./doctor.js";
@@ -21,6 +22,7 @@ Commands:
   templates [--json]
   init [--config path]
   add <template> [--name value] [--config path]
+  audit [--clients codex,claude-desktop,cursor] [--config path] [--json]
   discover --client codex|claude-desktop|cursor [--json]
   import (--from path | --client codex|claude-desktop|cursor) [--config path]
   diff --target codex|claude-desktop|cursor [--config path] [--json]
@@ -43,6 +45,17 @@ function parseClient(value: string | undefined): ClientId | undefined {
     return undefined;
   }
   return value as ClientId;
+}
+
+function parseClients(value: string | undefined): ClientId[] {
+  if (!value) {
+    return ["codex", "claude-desktop", "cursor"];
+  }
+
+  return value
+    .split(",")
+    .map((item) => parseClient(item.trim()))
+    .filter((item): item is ClientId => Boolean(item));
 }
 
 async function main(): Promise<void> {
@@ -102,6 +115,21 @@ async function main(): Promise<void> {
         }
       }
       process.exit(report.every((item) => item.commandStatus === "present" && item.envStatus === "ok") ? 0 : 1);
+    }
+    case "audit": {
+      const clients = parseClients(flagValue(args, "--clients"));
+      const config = await loadConfig(configPath);
+      const audit = await auditClients(clients, config);
+      if (json) {
+        console.log(JSON.stringify(audit, null, 2));
+      } else {
+        for (const item of audit) {
+          console.log(
+            `${item.client}: ${item.status} added=${item.summary.added} changed=${item.summary.changed} removed=${item.summary.removed} unchanged=${item.summary.unchanged}`,
+          );
+        }
+      }
+      return;
     }
     case "diff": {
       const target = parseClient(flagValue(args, "--target"));
