@@ -1,7 +1,7 @@
 export { auditClients } from "./audit.js";
 export { loadConfig, saveConfig, addServer } from "./config.js";
 export { diffAgainstClient } from "./diff.js";
-export { applyToClient } from "./apply.js";
+export { applyToClient, rollbackClient } from "./apply.js";
 export { doctorConfig } from "./doctor.js";
 export { exportForTarget } from "./export.js";
 export { buildServerFromTemplate } from "./factory.js";

@@ -30,6 +30,7 @@ The practical flow is now:
 - `import` pulls existing `mcpServers` definitions from a client config JSON
 - `diff` compares your `mcpdock.json` against a target client before writing changes
 - `apply` writes the exported config into a target client file, preserves unrelated top-level settings, and creates a backup when overwriting
+- `rollback` restores the most recent client backup created by `apply`
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON
 
@@ -58,6 +59,7 @@ npx tsx src/cli.ts add github --name github-main
 npx tsx src/cli.ts doctor
 npx tsx src/cli.ts diff --target codex
 npx tsx src/cli.ts apply --target codex
+npx tsx src/cli.ts rollback --target codex
 npx tsx src/cli.ts export --target codex
 ```
 

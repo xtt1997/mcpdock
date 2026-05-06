@@ -36,3 +36,15 @@ export async function applyToClient(
   await fs.writeFile(targetPath, `${JSON.stringify(nextConfig, null, 2)}\n`, "utf8");
   return { targetPath, backupPath };
 }
+
+export async function rollbackClient(
+  target: ClientId,
+  homeDir?: string,
+): Promise<{ targetPath: string; restoredFrom: string }> {
+  const discovery = await discoverClientConfig(target, homeDir);
+  const targetPath = discovery.selectedPath;
+  const restoredFrom = `${targetPath}.bak`;
+
+  await fs.copyFile(restoredFrom, targetPath);
+  return { targetPath, restoredFrom };
+}

@@ -2,7 +2,7 @@
 
 import process from "node:process";
 
-import { applyToClient } from "./apply.js";
+import { applyToClient, rollbackClient } from "./apply.js";
 import { auditClients } from "./audit.js";
 import { addServer, loadConfig, saveConfig } from "./config.js";
 import { diffAgainstClient } from "./diff.js";
@@ -27,6 +27,7 @@ Commands:
   import (--from path | --client codex|claude-desktop|cursor) [--config path]
   diff --target codex|claude-desktop|cursor [--config path] [--json]
   apply --target codex|claude-desktop|cursor [--config path] [--json]
+  rollback --target codex|claude-desktop|cursor [--json]
   doctor [--config path] [--json]
   export --target codex|claude-desktop|cursor [--config path]`);
 }
@@ -155,6 +156,15 @@ async function main(): Promise<void> {
       const config = await loadConfig(configPath);
       const result = await applyToClient(target, config);
       console.log(json ? JSON.stringify(result, null, 2) : `Applied ${config.servers.length} servers to ${result.targetPath}`);
+      return;
+    }
+    case "rollback": {
+      const target = parseClient(flagValue(args, "--target"));
+      if (!target) {
+        throw new Error("rollback requires --target codex|claude-desktop|cursor");
+      }
+      const result = await rollbackClient(target);
+      console.log(json ? JSON.stringify(result, null, 2) : `Restored ${result.targetPath} from ${result.restoredFrom}`);
       return;
     }
     case "discover": {
