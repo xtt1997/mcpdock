@@ -14,11 +14,18 @@ The MCP ecosystem is growing fast, but the setup path is still messy:
 
 `mcpdock` gives you one local source of truth.
 
+The practical flow is now:
+- import what you already use today from an existing client config
+- normalize it into `mcpdock.json`
+- doctor the config
+- export it back out where you need it
+
 ## Commands
 
 - `templates` shows a curated starter catalog
 - `init` creates `mcpdock.json`
 - `add` adds a server definition from a template
+- `import` pulls existing `mcpServers` definitions from a client config JSON
 - `doctor` checks command presence and empty env placeholders
 - `export` renders client-specific JSON
 
@@ -39,6 +46,7 @@ npx tsx src/cli.ts --help
 
 ```bash
 npx tsx src/cli.ts init
+npx tsx src/cli.ts import --from ~/.codex/config.json
 npx tsx src/cli.ts add github --name github-main
 npx tsx src/cli.ts doctor
 npx tsx src/cli.ts export --target codex
